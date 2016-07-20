@@ -1,1 +1,3 @@
 # dida-JavaFund-
+
+testscript
