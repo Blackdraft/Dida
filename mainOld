@@ -1,0 +1,159 @@
+package MiniCase1;
+
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.Set;
+
+import Sport.Sport;
+
+public class Main {
+
+	public static void main(String[] args) throws IOException {
+		// Coded by Bas Paauwe
+
+		/*
+		 * 
+		 * GET 6 LETTER WORDS TO ARRAY CACHE
+		 * 
+		 */
+		// init as null
+		DataInputStream is = null;
+		// load groene boekje
+		try {
+			is = new DataInputStream(new FileInputStream("/Users/mac/Desktop/groene_boekje.txt"));
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		// create empty array and 'line'
+		ArrayList<String> wordCache = new ArrayList<String>();
+
+		String line;
+
+		// loop through file and store 6 letter words
+		while ((line = is.readLine()) != null) {
+
+			// split at \n
+			String[] wordsInFile = line.split("\n");
+			// put 6 letter words in array
+			for (int i = 0; i < wordsInFile.length; i++) {
+				String word = wordsInFile[i];
+				if (word.length() == 6) {
+					wordCache.add(word);
+				}
+			}
+
+		}
+		// print as check
+		System.out.println(wordCache.size());
+
+		int wordCacheSize = wordCache.size();
+
+		// for (int i = 0; i < wordCache.size(); i++) {
+		// System.out.println(wordCache.get(i));
+		// }
+
+		/*
+		 * 
+		 * CALL HANGMAN METHODES
+		 * 
+		 */
+
+		// generate and set the word to play with via getRandomWord methode
+		System.out.println("We're playing hangman with... ");
+
+		RandomWord gameWord1 = new RandomWord(wordCacheSize, wordCache);
+		String defWord = gameWord1.getRandomWord();
+		//System.out.println("temp check " + defWord);
+
+		/*
+		 * 
+		 * MAIN MODULE TO PLAY GAME
+		 * 
+		 */
+
+		// initialize
+		int guessCounter = 0;
+		int position = 0;
+		int turnsSet = 16;
+		String finalGuess = "......";
+		String guessedLetters = "";
+
+		// fill array with loop
+		ArrayList<String> finalGuessTemp = new ArrayList<String>();
+		for (int x = 0; x < 6; x++) {
+			finalGuessTemp.add(".");
+		}
+
+		// main loop
+		while (defWord != finalGuess || guessCounter < turnsSet) {
+			System.out.println("Guess a letter! ");
+			Scanner sc = new Scanner(System.in);
+			String letterGuess = sc.nextLine();
+			while (guessedLetters.contains(letterGuess) || letterGuess.length() > 1) {
+				System.out.println("already guessed or double letter! try a new letter: ");
+				letterGuess = sc.nextLine();
+			}
+			// iterate through the defWord (answer) and check if the given char
+			// is present at the positions
+			for (int x = 0; x < 6; x++) {
+				// boolean set = false;
+				if (defWord.charAt(x) == letterGuess.charAt(0)) {
+					// make sure it gets the next position if a letter occurs
+					// double or tripple
+					position = defWord.indexOf(letterGuess, position);
+					// print a found matching letter
+					// System.out.println(" " + defWord.charAt(position) + " at
+					// position " + (position +1));
+
+					// set at the right position
+					finalGuessTemp.set(position, letterGuess);
+
+					int temp = position + 1;
+					position = defWord.indexOf(letterGuess, temp);
+				}
+				if (guessedLetters.contains(letterGuess)) {
+					continue;
+				} else {
+					guessedLetters += letterGuess;
+				}
+
+			}
+			// temp + loop to get array to string
+			String temp2 = "";
+			for (int x = 0; x < defWord.length(); x++) {
+				String temp = finalGuessTemp.get(x);
+				temp2 += temp;
+				// insert win condition
+				if (temp2.equals(defWord)) {
+					System.out.println("You win in " + guessCounter + " turns! \n the word was " + defWord);
+					System.exit(x);
+					;
+				}
+				if (x == 5) {
+					System.out.println("Progress on the word is: " + temp2);
+				}
+			}
+			System.out.println("guessed letters are: " + guessedLetters);
+			// System.out.println("Progress on the word is " + finalGuessTemp);
+			guessCounter++;
+			if (guessCounter > turnsSet) {
+				System.out.println("you lose!! out of turns! the word was: " + defWord);
+				break;
+			}
+			if (guessCounter % 3 == 0) {
+				System.out.println(((turnsSet + 1) - guessCounter) + " turns left!");
+			}
+		}
+	}
+
+}
